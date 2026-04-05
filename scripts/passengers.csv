@@ -1,0 +1,6 @@
+fromPort,toPort,inputName,address,city,state,zipCode,cardType,creditCardNumber,creditCardMonth,creditCardYear,nameOnCard,rememberMe
+Paris,Buenos Aires,Ana Souza,Rua das Flores 100,Sao Paulo,SP,01001000,visa,4111111111111111,12,2028,Ana Souza,on
+Philadelphia,London,Bruno Lima,Av Paulista 1500,Sao Paulo,SP,01310200,amex,378282246310005,11,2029,Bruno Lima,on
+Boston,New York,Carla Martins,Rua XV de Novembro 45,Curitiba,PR,80020000,dinersclub,30569309025904,10,2030,Carla Martins,on
+Portland,Rome,Diego Ferreira,Rua da Aurora 77,Recife,PE,50050000,visa,4012888888881881,09,2027,Diego Ferreira,on
+San Diego,Berlin,Eduarda Costa,Av Atlantica 2200,Rio de Janeiro,RJ,22021001,amex,371449635398431,08,2031,Eduarda Costa,on

@@ -1,0 +1,43 @@
+services:
+  perf-load:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: blazedemo-performance:local
+    command:
+      - -n
+      - -t
+      - scripts/load_test.jmx
+      - -l
+      - results/load/load.jtl
+      - -j
+      - results/load/jmeter.log
+      - -e
+      - -o
+      - results/load/dashboard
+    volumes:
+      - ./results:/workspace/results
+
+  perf-peak:
+    image: blazedemo-performance:local
+    command:
+      - -n
+      - -t
+      - scripts/peak_test.jmx
+      - -l
+      - results/peak/peak.jtl
+      - -j
+      - results/peak/jmeter.log
+      - -e
+      - -o
+      - results/peak/dashboard
+    volumes:
+      - ./results:/workspace/results
+
+  perf-all:
+    image: blazedemo-performance:local
+    command:
+      - run-all
+    volumes:
+      - ./results:/workspace/results
+      - ./allure-results:/workspace/allure-results

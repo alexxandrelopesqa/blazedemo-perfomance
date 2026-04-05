@@ -1,0 +1,10 @@
+results/**
+!results/.gitkeep
+allure-results/
+.allure-history/
+*.jtl
+*.log
+*.tmp
+__pycache__/
+tools/
+pages/
