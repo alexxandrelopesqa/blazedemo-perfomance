@@ -344,16 +344,14 @@
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
-          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Groovy - Detailed Failure Logger" enabled="true">
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Groovy - Safe Failure Logger" enabled="true">
             <stringProp name="cacheKey">blazedemo-failure-logger</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
             <stringProp name="scriptLanguage">groovy</stringProp>
             <stringProp name="script">if (!prev.isSuccessful()) {
-    def body = prev.getResponseDataAsString() ?: ''
-    def compactBody = body.replaceAll('\\s+', ' ')
-    def snippet = compactBody.length() &gt; 1000 ? compactBody.substring(0, 1000) + '... [TRUNCATED]' : compactBody
-    log.error("ASSERTION_FAILURE | label=${prev.getSampleLabel()} | rc=${prev.getResponseCode()} | msg=${prev.getResponseMessage()} | url=${prev.getURL()} | thread=${ctx.getThread().getThreadName()} | response=${snippet}")
+    def bodyLen = prev.getBytesAsLong()
+    log.error("ASSERTION_FAILURE | label=${prev.getSampleLabel()} | rc=${prev.getResponseCode()} | msg=${prev.getResponseMessage()} | url=${prev.getURL()} | thread=${ctx.getThread().getThreadName()} | response_bytes=${bodyLen}")
 }</stringProp>
           </JSR223PostProcessor>
           <hashTree/>

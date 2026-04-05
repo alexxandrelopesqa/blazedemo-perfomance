@@ -48,14 +48,16 @@ jobs:
 
       - name: Instalar JMeter 5.6.3
         run: |
-          curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz -o jmeter.tgz
-          tar -xzf jmeter.tgz
+          curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz -o apache-jmeter-5.6.3.tgz
+          curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz.sha512 -o apache-jmeter-5.6.3.tgz.sha512
+          sha512sum -c apache-jmeter-5.6.3.tgz.sha512
+          tar -xzf apache-jmeter-5.6.3.tgz
           mv apache-jmeter-5.6.3 "${HOME}/jmeter"
-          rm -f jmeter.tgz
+          rm -f apache-jmeter-5.6.3.tgz apache-jmeter-5.6.3.tgz.sha512
           cp docker/user.properties "${HOME}/jmeter/bin/user.properties"
 
       - name: Instalar Allure CLI
-        run: npm install --global allure-commandline@2.34.1
+        run: npm install --global --ignore-scripts allure-commandline@2.34.1
 
       - name: Rodar teste de carga (alvo 250 RPS)
         run: |

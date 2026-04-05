@@ -19,12 +19,24 @@ pipeline {
     }
 
     stage('Build Image') {
+      when {
+        anyOf {
+          branch 'main'
+          branch 'master'
+        }
+      }
       steps {
         sh 'docker build -f docker/Dockerfile -t ${IMAGE_NAME} .'
       }
     }
 
     stage('Run Load Test') {
+      when {
+        anyOf {
+          branch 'main'
+          branch 'master'
+        }
+      }
       steps {
         sh '''
           mkdir -p results/load
@@ -37,6 +49,12 @@ pipeline {
     }
 
     stage('Run Peak Test') {
+      when {
+        anyOf {
+          branch 'main'
+          branch 'master'
+        }
+      }
       steps {
         sh '''
           mkdir -p results/peak
@@ -49,6 +67,12 @@ pipeline {
     }
 
     stage('Generate Allure Report') {
+      when {
+        anyOf {
+          branch 'main'
+          branch 'master'
+        }
+      }
       steps {
         sh '''
           mkdir -p allure-results results/allure-report

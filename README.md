@@ -175,6 +175,8 @@ Hardening aplicado:
 - Job de teste com permissão mínima: `contents: read`.
 - Job de deploy com permissões específicas: `pages: write` e `id-token: write`.
 - Publicação de artefatos com retenção de 14 dias.
+- Download do JMeter com validação de checksum SHA-512 no CI.
+- Instalação do Allure CLI com `--ignore-scripts` para reduzir risco de supply chain.
 
 ## Jenkins
 
@@ -187,6 +189,10 @@ Fluxo do pipeline:
 3. Execucao do peak test
 4. Conversao para Allure e geracao do relatorio
 5. Archive dos artefatos (`results/**/*` e `allure-results/**/*`)
+
+Observacao de segurança:
+
+- Os stages de execução pesada estão limitados a `main` e `master` para reduzir risco com branches não confiáveis.
 
 ## Publicação no GitHub Pages
 
