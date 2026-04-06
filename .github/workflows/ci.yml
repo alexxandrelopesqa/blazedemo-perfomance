@@ -154,17 +154,17 @@ jobs:
           HTML
 
       - name: Configurar GitHub Pages
-        if: github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'master')
+        if: always() && github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'master')
         uses: actions/configure-pages@v5
 
       - name: Publicar artefato do Pages
-        if: github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'master')
+        if: always() && github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'master')
         uses: actions/upload-pages-artifact@v3
         with:
           path: pages
 
   deploy-pages:
-    if: github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'master')
+    if: always() && github.event_name != 'pull_request' && (github.ref_name == 'main' || github.ref_name == 'master')
     needs: performance-check
     runs-on: ubuntu-latest
     permissions:

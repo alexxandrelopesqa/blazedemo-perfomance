@@ -119,9 +119,19 @@ O pipeline:
 5. publica artifacts
 6. publica página no GitHub Pages (main/master)
 
+Comportamento de robustez:
+
+- passos de publicação executam com `always()` para não perder artefatos em falha parcial de teste;
+- deploy do Pages usa o resultado do job de performance, mantendo trilha de execução mesmo quando o teste degrada.
+
 ### Jenkins
 
 Pipeline declarativa em `Jenkinsfile` com execução via Docker.
+
+Comportamento de robustez:
+
+- estágios de execução usam `catchError` para continuar a coleta de evidências mesmo com falha de carga;
+- geração de Allure é condicional à existência de JTL (evita quebra por ausência de um dos cenários).
 
 ## Onde encontrar artefatos e evidências
 
