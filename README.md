@@ -1,262 +1,186 @@
-# BlazeDemo - Engenharia de Performance
+# BlazeDemo - Teste de Performance (JMeter)
 
-Este repositório foi montado para testar, de ponta a ponta, o fluxo de compra de passagem do [BlazeDemo](https://www.blazedemo.com) com foco em uso real de engenharia (execução local, Docker e CI).
+Repositório técnico para avaliar o fluxo completo de compra de passagem no [BlazeDemo](https://www.blazedemo.com) usando apenas JMeter.
 
-Repositório alvo: [alexxandrelopesqa/blazedemo-perfomance](https://github.com/alexxandrelopesqa/blazedemo-perfomance.git)
+Repositório: [alexxandrelopesqa/blazedemo-perfomance](https://github.com/alexxandrelopesqa/blazedemo-perfomance.git)
 
-## Objetivo
+## Visão geral do desafio
 
-- Sustentar **250 requisições por segundo (RPS)** no cenário principal.
-- Manter **p90 menor que 2 segundos**.
-- Garantir o sucesso funcional da jornada de compra (até a confirmação).
+Critério de aceitação pedido:
 
-## O que tem aqui
+- Sustentar `250 RPS`
+- Manter `p90 < 2s`
+
+Cenário funcional obrigatório (implementado):
+
+1. `GET /`
+2. `POST /reserve.php` (origem/destino)
+3. seleção de voo com extração dinâmica de `flight`, `price`, `airline`
+4. `POST /purchase.php`
+5. `POST /confirmation.php`
+
+Asserções funcionais:
+
+- HTTP 200 em todas as etapas
+- resposta final contendo `Thank you for your purchase today!`
+
+## Estrutura do projeto
 
 ```text
 .
 ├── Jenkinsfile
 ├── docker-compose.yml
-├── .github/
-│   └── workflows/
-│       └── ci.yml
+├── .github/workflows/ci.yml
 ├── docker/
 │   ├── Dockerfile
 │   ├── entrypoint.sh
 │   ├── run_all.sh
 │   └── user.properties
+├── scripts/
+│   ├── load_test.jmx
+│   ├── peak_test.jmx
+│   ├── passengers.csv
+│   └── jtl_to_allure.py
 ├── results/
 │   └── .gitkeep
-├── scripts/
-│   ├── jtl_to_allure.py
-│   ├── load_test.jmx
-│   ├── passengers.csv
-│   └── peak_test.jmx
-├── .gitignore
+├── DECISIONS.md
+├── RUNBOOK.md
 └── README.md
 ```
 
-## Cenário coberto nos scripts
+## Arquitetura do teste e perfil de carga
 
-Fluxo funcional completo:
+### 1) Load test (`scripts/load_test.jmx`)
 
-1. `GET /` (home)
-2. `POST /reserve.php` (origem e destino)
-3. Extração dinâmica de `flight`, `price` e `airline`
-4. `POST /purchase.php` (seleção do voo)
-5. `POST /confirmation.php` (compra confirmada com dados do CSV)
+Objetivo: validar estabilidade no patamar alvo.
 
-Asserções usadas:
-
-- Status HTTP `200` em todas as etapas.
-- Texto final `Thank you for your purchase today!`.
-- Log detalhado de falha via Groovy (`JSR223 PostProcessor`) para acelerar diagnóstico.
-
-## Planos de teste
-
-### `scripts/load_test.jmx`
-- Alvo de throughput: `15000` amostras/minuto (~250 RPS)
+- Throughput alvo: `15000/min` (~250 RPS)
 - `350` threads
-- Ramp-up de `120s`
-- Duração de `600s`
+- ramp-up `120s`
+- duração `600s`
 
-### `scripts/peak_test.jmx`
-- Alvo de throughput: `21000` amostras/minuto (~350 RPS)
+### 2) Spike test (`scripts/peak_test.jmx`)
+
+Objetivo: observar degradação e recuperação sob aumento brusco.
+
+- Throughput alvo: `21000/min` (~350 RPS)
 - `500` threads
-- Ramp-up de `30s`
-- Duração de `240s`
+- ramp-up `30s`
+- duração `240s`
 
-## Como rodar localmente
+## Pré-requisitos
 
-Pré-requisitos:
+Você pode executar de duas formas:
+
+### Opção A - Local clássico
 
 - Java 17+
 - JMeter 5.6.3
-- Python 3.10+ (para conversão JTL -> Allure)
-- Allure CLI (opcional, para relatório local)
+- Python 3.10+ (para consolidar resumo Allure)
+- Allure CLI (opcional)
 
-### Executar carga
+### Opção B - Sem instalar Java/JMeter/Python/Allure
 
-```bash
-jmeter -n -t scripts/load_test.jmx -l results/load.jtl -e -o results/dashboard-load
-```
+- Docker Desktop + Docker Compose
 
-### Executar pico
+## Execução local passo a passo
 
-```bash
-jmeter -n -t scripts/peak_test.jmx -l results/peak.jtl -e -o results/dashboard-peak
-```
-
-### Gerar dados para Allure
-
-```bash
-python scripts/jtl_to_allure.py results/load.jtl allure-results "Load Test 250 RPS"
-python scripts/jtl_to_allure.py results/peak.jtl allure-results "Peak Test 350 RPS"
-```
-
-### Gerar relatório Allure
-
-```bash
-allure generate allure-results --clean -o results/allure-report
-```
-
-## Como rodar via Docker
-
-Build da imagem:
-
-```bash
-docker build -f docker/Dockerfile -t my-jmeter-test .
-```
-
-Execução padrão solicitada:
-
-```bash
-docker run --rm -v "$(pwd)/results:/workspace/results" my-jmeter-test -n -t scripts/load_test.jmx -l results/res.jtl -e -o results/dashboard
-```
-
-Execução de pico:
-
-```bash
-docker run --rm -v "$(pwd)/results:/workspace/results" my-jmeter-test -n -t scripts/peak_test.jmx -l results/peak.jtl -e -o results/peak-dashboard
-```
-
-## Execucao local sem dependencias externas
-
-Se quiser rodar localmente sem instalar Java, JMeter, Python ou Allure na sua maquina, use apenas Docker/Docker Compose.
-
-Prerequisito unico:
-
-- Docker Desktop (com Compose)
-
-### Subir e rodar so o load test
+### Execução com Docker Compose (recomendado)
 
 ```bash
 docker compose build
 docker compose run --rm perf-load
-```
-
-### Rodar so o peak test
-
-```bash
 docker compose run --rm perf-peak
-```
-
-### Rodar fluxo completo (load + peak + Allure)
-
-```bash
 docker compose run --rm perf-all
 ```
 
-Artefatos gerados:
+### Execução local com JMeter CLI
+
+```bash
+jmeter -n -t scripts/load_test.jmx -l results/load/load.jtl -e -o results/load/dashboard
+jmeter -n -t scripts/peak_test.jmx -l results/peak/peak.jtl -e -o results/peak/dashboard
+python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load Test 250 RPS"
+python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak Test 350 RPS"
+allure generate allure-results --clean -o results/allure-report
+```
+
+## CI/CD e publicação
+
+### GitHub Actions
+
+Workflow: `.github/workflows/ci.yml`
+
+O pipeline:
+
+1. prepara Java/Python/Node
+2. baixa JMeter (com validação SHA-512)
+3. roda load e spike em modo headless
+4. gera dashboards JMeter e Allure
+5. publica artifacts
+6. publica página no GitHub Pages (main/master)
+
+### Jenkins
+
+Pipeline declarativa em `Jenkinsfile` com execução via Docker.
+
+## Onde encontrar artefatos e evidências
 
 - `results/load/dashboard/index.html`
 - `results/peak/dashboard/index.html`
 - `results/allure-report/index.html`
+- `allure-results/load_test_250_rps-summary.json`
+- `allure-results/peak_test_350_rps-summary.json`
 
-Observacao: a execucao ainda depende de internet para acessar `www.blazedemo.com`.
+## Conclusão objetiva (baseline atual)
 
-## Pipeline CI (GitHub Actions)
+### Resultado final
 
-Arquivo: `.github/workflows/ci.yml`
+**Não atende** ao critério de aceitação nesta rodada.
 
-O pipeline faz:
+### O que foi medido
 
-1. Setup de Java, Python e Node.
-2. Download do JMeter.
-3. Execução headless de `load_test.jmx` e `peak_test.jmx`.
-4. Geração dos dashboards HTML do JMeter.
-5. Conversão de JTL para resultados Allure.
-6. Geração de relatório Allure com reaproveitamento de histórico.
-7. Upload de artefatos.
-8. Montagem de um site estático com links para os relatórios.
-9. Deploy automático no GitHub Pages (push em `main`/`master`).
+#### Load test (principal)
 
-Hardening aplicado:
+- throughput: `292.73 RPS` (**acima de 250**)
+- p90: `6890 ms` (**acima de 2s**)
+- falhas: `6299 / 175650`
+- latency média: `2165.61 ms`
 
-- Job de teste com permissão mínima: `contents: read`.
-- Job de deploy com permissões específicas: `pages: write` e `id-token: write`.
-- Publicação de artefatos com retenção de 14 dias.
-- Download do JMeter com validação de checksum SHA-512 no CI.
-- Instalação do Allure CLI com `--ignore-scripts` para reduzir risco de supply chain.
+#### Spike test
 
-## Jenkins
+- throughput: `231.17 RPS`
+- p90: `10376 ms`
+- falhas: `8247 / 55511`
+- latency média: `4100.34 ms`
 
-O projeto inclui `Jenkinsfile` declarativo para rodar no Jenkins usando Docker no agente.
+### Decisão técnica
 
-Fluxo do pipeline:
+Mesmo com throughput razoável no load, a cauda de latência e a taxa de erro estão altas.  
+Com base em métricas objetivas, este baseline reprova no critério `p90 < 2s`.
 
-1. Build da imagem (`docker/Dockerfile`)
-2. Execucao do load test
-3. Execucao do peak test
-4. Conversao para Allure e geracao do relatorio
-5. Archive dos artefatos (`results/**/*` e `allure-results/**/*`)
+## Rodadas de tuning (registro rápido)
 
-Observacao de segurança:
+| Rodada | Mudança | RPS | p90 (ms) | Erro | Decisão |
+|---|---|---:|---:|---:|---|
+| baseline | perfil inicial load/spike | 292.73 (load) | 6890 (load) | 6299/175650 | reprova p90 e erro |
+| spike baseline | pico com ramp-up curto | 231.17 (spike) | 10376 (spike) | 8247/55511 | degradação forte sob pico |
 
-- Os stages de execução pesada estão limitados a `main` e `master` para reduzir risco com branches não confiáveis.
+## Limitações e considerações importantes
 
-## Publicação no GitHub Pages
+- O alvo testado é um site público (`www.blazedemo.com`), então há variabilidade externa de rede/infra.
+- Resultado local depende da máquina geradora de carga.
+- Mesmo rodando em Docker, ainda existe dependência de internet para atingir o sistema alvo.
 
-O workflow já está preparado para publicar automaticamente no Pages.
+## Segurança e governança
 
-### Como habilitar no repositório
+- `.gitignore` preparado para não subir resultados temporários
+- sem segredos/token no repositório
+- CI com permissões mínimas por job
+- validação de checksum no download do JMeter
+- container de execução como usuário não-root
 
-1. Acesse **Settings** do repositório.
-2. Abra **Pages**.
-3. Em **Build and deployment**, selecione **Source: GitHub Actions**.
-4. Faça push para `main` (ou execute manualmente via `workflow_dispatch`).
+## Próximos passos sugeridos
 
-Após o primeiro deploy, a URL fica no formato:
-
-- `https://<seu-usuario>.github.io/<nome-do-repo>/`
-
-No index publicado no Pages você terá links para:
-
-- Dashboard JMeter de carga
-- Dashboard JMeter de pico
-- Relatório Allure
-
-## Como avaliar se a meta foi atingida
-
-No dashboard do JMeter, olhe principalmente o **Aggregate Report** do `load_test`:
-
-- `Throughput` >= **250 req/s**
-- `90% Line` < **2000 ms**
-- `Error %` = **0**
-
-No Allure, cada execução também é marcada como `failed` caso:
-
-- haja falhas funcionais (`success=false`),
-- o RPS fique abaixo de 250,
-- ou o p90 fique maior/igual a 2000 ms.
-
-## Troubleshooting prático
-
-### 1) Ajustar heap do JMeter
-
-No Docker:
-
-```bash
-docker run --rm -e JMETER_HEAP="-Xms2g -Xmx4g -XX:MaxMetaspaceSize=512m" -v "$(pwd)/results:/workspace/results" my-jmeter-test -n -t scripts/load_test.jmx -l results/res.jtl -e -o results/dashboard
-```
-
-No arquivo `docker/user.properties`:
-
-```properties
-heap=-Xms2g -Xmx4g -XX:MaxMetaspaceSize=512m
-```
-
-### 2) Throughput não chega na meta
-
-- Aumente `num_threads` gradualmente.
-- Ajuste o `ramp_time` para reduzir burst de abertura.
-- Monitore CPU/RAM do gerador de carga.
-- Se necessário, rode em runner maior (mais CPU/memória).
-
-### 3) Assertion falhando
-
-Conferir:
-
-- `results/load/jmeter.log`
-- `results/peak/jmeter.log`
-
-Os logs já saem com contexto (sampler, response code, URL e trecho da resposta) para facilitar análise.
+- Rodar tuning iterativo (threads, ramp-up, pacing e timeouts) em 3 a 5 rodadas.
+- Fixar ambiente de execução dedicado para reduzir ruído.
+- Comparar p90 por transação (não só total) para identificar gargalos mais rápido.
