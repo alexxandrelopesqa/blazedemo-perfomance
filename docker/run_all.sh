@@ -1,6 +1,11 @@
 #!/usr/bin/env sh
 set -eu
 
+export TARGET_URL="${TARGET_URL:-https://www.blazedemo.com}"
+export ACCEPTANCE_RPS="${ACCEPTANCE_RPS:-250}"
+export ACCEPTANCE_P90_MS="${ACCEPTANCE_P90_MS:-2000}"
+export JMETER_VERSION="${JMETER_VERSION:-5.6.3}"
+
 mkdir -p /workspace/results/load /workspace/results/peak /workspace/results/allure-report /workspace/allure-results
 
 echo "[run-all] Executando load_test.jmx"

@@ -141,6 +141,15 @@ Comportamento de robustez:
 - `allure-results/load_test_250_rps-summary.json`
 - `allure-results/peak_test_350_rps-summary.json`
 
+### O que você passa a ver no Allure
+
+Além do overview básico, o projeto agora publica:
+
+- `Environment` preenchido (target, thresholds, runner e versões)
+- `Executors` preenchido (contexto local/CI)
+- `Categories` com classificação de falha (SLO, funcional, timeout/rede)
+- casos detalhados por sampler/transação com anexos JSON de métricas e erros
+
 ## Conclusão objetiva (baseline atual)
 
 ### Resultado final
