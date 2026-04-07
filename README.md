@@ -1,17 +1,27 @@
-# BlazeDemo - Teste de Performance (JMeter)
+# BlazeDemo - Confiabilidade da Jornada de Compra
 
-Repositório técnico para avaliar o fluxo completo de compra de passagem no [BlazeDemo](https://www.blazedemo.com) usando apenas JMeter.
+Repositório técnico para avaliar a jornada completa de compra de passagem no [BlazeDemo](https://www.blazedemo.com) com JMeter, dashboards HTML e consolidação no Allure.
 
 Repositório: [alexxandrelopesqa/blazedemo-perfomance](https://github.com/alexxandrelopesqa/blazedemo-perfomance.git)
 
-## Visão geral do desafio
+## Objetivo e critério de aceite
 
-Critério de aceitação pedido:
+Critério solicitado:
 
 - Sustentar `250 RPS`
 - Manter `p90 < 2s`
 
-Cenário funcional obrigatório (implementado):
+Regra de aprovação rápida:
+
+- `Throughput >= 250 req/s`
+- `90% Line < 2000 ms`
+- `Error %` próximo de `0`
+
+Se qualquer item falhar, considerar baseline reprovado no critério.
+
+## Jornada de negócio coberta
+
+Fluxo ponta a ponta implementado:
 
 1. `GET /`
 2. `POST /reserve.php` (origem/destino)
@@ -24,68 +34,29 @@ Asserções funcionais:
 - HTTP 200 em todas as etapas
 - resposta final contendo `Thank you for your purchase today!`
 
-## Estrutura do projeto
+## Arquitetura e perfil de carga
 
-```text
-.
-├── Jenkinsfile
-├── docker-compose.yml
-├── .github/workflows/ci.yml
-├── docker/
-│   ├── Dockerfile
-│   ├── entrypoint.sh
-│   ├── run_all.sh
-│   └── user.properties
-├── scripts/
-│   ├── load_test.jmx
-│   ├── peak_test.jmx
-│   ├── passengers.csv
-│   └── jtl_to_allure.py
-├── results/
-│   └── .gitkeep
-├── DECISIONS.md
-├── RUNBOOK.md
-└── README.md
-```
+### Cenario 1 - compra sob carga sustentada (`scripts/load_test.jmx`)
 
-## Arquitetura do teste e perfil de carga
-
-### 1) Cenario de compra sob carga sustentada (`scripts/load_test.jmx`)
-
-Objetivo: validar estabilidade no patamar alvo.
-
-- Throughput alvo: `15000/min` (~250 RPS)
+- throughput alvo: `15000/min` (~250 RPS)
 - `350` threads
 - ramp-up `120s`
 - duração `600s`
+- objetivo: validar estabilidade no patamar alvo
 
-### 2) Cenario de compra sob pico abrupto (`scripts/peak_test.jmx`)
+### Cenario 2 - compra sob pico abrupto (`scripts/peak_test.jmx`)
 
-Objetivo: observar degradação e recuperação sob aumento brusco.
-
-- Throughput alvo: `21000/min` (~350 RPS)
+- throughput alvo: `21000/min` (~350 RPS)
 - `500` threads
 - ramp-up `30s`
 - duração `240s`
+- objetivo: observar degradação e recuperação sob aumento brusco
 
-## Pré-requisitos
+## Como executar
 
-Você pode executar de duas formas:
+### Opcao recomendada (Docker Compose)
 
-### Opção A - Local clássico
-
-- Java 17+
-- JMeter 5.6.3
-- Python 3.10+ (para consolidar resumo Allure)
-- Allure CLI (opcional)
-
-### Opção B - Sem instalar Java/JMeter/Python/Allure
-
-- Docker Desktop + Docker Compose
-
-## Execução local passo a passo
-
-### Execução com Docker Compose (recomendado)
+Pré-requisito: Docker Desktop + Docker Compose.
 
 ```bash
 docker compose build
@@ -94,7 +65,21 @@ docker compose run --rm perf-peak
 docker compose run --rm perf-all
 ```
 
-### Execução local com JMeter CLI
+Saídas esperadas:
+
+- `results/load/dashboard/index.html`
+- `results/peak/dashboard/index.html`
+- `results/allure-report/index.html`
+- `allure-results/*-summary.json`
+
+### Opcao local com CLI (sem Docker)
+
+Pré-requisitos:
+
+- Java 17+
+- JMeter 5.6.3
+- Python 3.10+
+- Allure CLI (opcional)
 
 ```bash
 jmeter -n -t scripts/load_test.jmx -l results/load/load.jtl -e -o results/load/dashboard
@@ -104,102 +89,108 @@ python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Concluir c
 allure generate allure-results --clean -o results/allure-report
 ```
 
+## Validacao e evidencias
+
+Abrir:
+
+- `results/load/dashboard/index.html` (Aggregate Report)
+- `results/peak/dashboard/index.html`
+- `results/allure-report/index.html`
+
+Arquivos importantes para avaliação:
+
+- `allure-results/concluir_compra_carga_sustentada_250_rps-summary.json`
+- `allure-results/concluir_compra_pico_abrupto_350_rps-summary.json`
+- trechos de `results/load/jmeter.log` e `results/peak/jmeter.log` com erros principais
+
+No Allure, além do overview, o projeto publica:
+
+- `Environment` (target, thresholds, runner, versões)
+- `Executor` (contexto local/CI)
+- `Categories` com classificação de falha (SLO, funcional, timeout/rede)
+- casos detalhados por sampler/transação com anexos JSON de métricas e erros
+
 ## CI/CD e publicação
 
 ### GitHub Actions
 
 Workflow: `.github/workflows/ci.yml`
 
-O pipeline:
+Pipeline:
 
 1. prepara Java/Python/Node
-2. baixa JMeter (com validação SHA-512)
-3. roda load e spike em modo headless
+2. baixa JMeter com validação SHA-512
+3. executa cenários em modo headless
 4. gera dashboards JMeter e Allure
 5. publica artifacts
-6. publica página no GitHub Pages (main/master)
+6. publica página no GitHub Pages (`main/master`)
 
-Comportamento de robustez:
+Robustez:
 
-- passos de publicação executam com `always()` para não perder artefatos em falha parcial de teste;
-- deploy do Pages usa o resultado do job de performance, mantendo trilha de execução mesmo quando o teste degrada.
+- etapas de publicação executam com `always()`
+- deploy do Pages preserva a trilha de execução mesmo com degradação
 
 ### Jenkins
 
 Pipeline declarativa em `Jenkinsfile` com execução via Docker.
 
-Comportamento de robustez:
+Robustez:
 
-- estágios de execução usam `catchError` para continuar a coleta de evidências mesmo com falha de carga;
-- geração de Allure é condicional à existência de JTL (evita quebra por ausência de um dos cenários).
+- estágios de execução com `catchError` para manter evidências
+- geração de Allure condicional à existência de JTL
 
-## Onde encontrar artefatos e evidências
+## Decisoes tecnicas consolidadas
 
-- `results/load/dashboard/index.html`
-- `results/peak/dashboard/index.html`
-- `results/allure-report/index.html`
-- `allure-results/concluir_compra_carga_sustentada_250_rps-summary.json`
-- `allure-results/concluir_compra_pico_abrupto_350_rps-summary.json`
+- Ferramenta de carga: JMeter (`.jmx`) por requisito do desafio e execução headless em CI
+- Fluxo funcional: jornada completa (`/`, `/reserve.php`, `/purchase.php`, `/confirmation.php`) para evitar falso positivo em endpoint isolado
+- Parametrização: `CSV Data Set Config` com `scripts/passengers.csv` para simular usuários distintos
+- Relatórios: dashboard HTML do JMeter + Allure para visão operacional e histórico
+- Execução local sem dependências: `docker-compose.yml` com `perf-load`, `perf-peak`, `perf-all`
+- Hardening aplicado:
+  - validação SHA-512 no download do JMeter
+  - Allure CLI com `--ignore-scripts`
+  - container com usuário não-root
+  - Jenkins com estágios pesados limitados a `main/master`
 
-### O que você passa a ver no Allure
+## Troubleshooting rapido
 
-Além do overview básico, o projeto agora publica:
+### Dashboard nao gera
 
-- `Environment` preenchido (target, thresholds, runner e versões)
-- `Executors` preenchido (contexto local/CI)
-- `Categories` com classificação de falha (SLO, funcional, timeout/rede)
-- casos detalhados por sampler/transação com anexos JSON de métricas e erros
+- Verificar se o diretório de saída já existe com conteúdo antigo
+- JMeter exige pasta nova ou vazia para `-e -o`
 
-## Conclusão objetiva (baseline atual)
+### RPS baixo na maquina local
 
-### Resultado final
+- Máquina geradora de carga pode estar saturada (CPU/RAM)
+- Ajustar ramp-up e quantidade de threads antes de subir throughput
 
-**Não atende** ao critério de aceitação nesta rodada.
+### Muitos timeouts
 
-### O que foi medido
+- Revisar `connect_timeout_ms` e `response_timeout_ms` no `.jmx`
+- Validar estabilidade da rede para `www.blazedemo.com`
 
-#### Load test (principal)
+## Resultado atual (baseline)
 
-- throughput: `292.73 RPS` (**acima de 250**)
-- p90: `6890 ms` (**acima de 2s**)
+Status: **não atende** ao critério nesta rodada.
+
+### Cenario de carga sustentada
+
+- throughput: `292.73 RPS` (acima de 250)
+- p90: `6890 ms` (acima de 2s)
 - falhas: `6299 / 175650`
 - latency média: `2165.61 ms`
 
-#### Spike test
+### Cenario de pico abrupto
 
 - throughput: `231.17 RPS`
 - p90: `10376 ms`
 - falhas: `8247 / 55511`
 - latency média: `4100.34 ms`
 
-### Decisão técnica
+Conclusão: apesar de throughput razoável no load, a latência de cauda e a taxa de erro permanecem altas, reprovando `p90 < 2s`.
 
-Mesmo com throughput razoável no load, a cauda de latência e a taxa de erro estão altas.  
-Com base em métricas objetivas, este baseline reprova no critério `p90 < 2s`.
+## Próximos passos
 
-## Rodadas de tuning (registro rápido)
-
-| Rodada | Mudança | RPS | p90 (ms) | Erro | Decisão |
-|---|---|---:|---:|---:|---|
-| baseline | perfil inicial load/spike | 292.73 (load) | 6890 (load) | 6299/175650 | reprova p90 e erro |
-| spike baseline | pico com ramp-up curto | 231.17 (spike) | 10376 (spike) | 8247/55511 | degradação forte sob pico |
-
-## Limitações e considerações importantes
-
-- O alvo testado é um site público (`www.blazedemo.com`), então há variabilidade externa de rede/infra.
-- Resultado local depende da máquina geradora de carga.
-- Mesmo rodando em Docker, ainda existe dependência de internet para atingir o sistema alvo.
-
-## Segurança e governança
-
-- `.gitignore` preparado para não subir resultados temporários
-- sem segredos/token no repositório
-- CI com permissões mínimas por job
-- validação de checksum no download do JMeter
-- container de execução como usuário não-root
-
-## Próximos passos sugeridos
-
-- Rodar tuning iterativo (threads, ramp-up, pacing e timeouts) em 3 a 5 rodadas.
-- Fixar ambiente de execução dedicado para reduzir ruído.
-- Comparar p90 por transação (não só total) para identificar gargalos mais rápido.
+- Rodar tuning iterativo (threads, ramp-up, pacing e timeouts) em 3 a 5 rodadas
+- Fixar ambiente de execução dedicado para reduzir ruído
+- Comparar p90 por transação (não só total) para localizar gargalos mais rápido
