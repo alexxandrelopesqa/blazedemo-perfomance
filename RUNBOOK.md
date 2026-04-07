@@ -35,8 +35,8 @@ Se qualquer item falhar, considerar baseline reprovado no critério.
 ## 3) Comandos de apoio (CLI)
 
 ```bash
-python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Concluir compra carga sustentada 250 RPS"
-python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Concluir compra pico abrupto 350 RPS"
+python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
+python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
 ```
 
 ## 4) Problemas comuns

@@ -110,10 +110,10 @@ def build_common_labels(test_name):
     return [
         {"name": "framework", "value": "jmeter"},
         {"name": "language", "value": "groovy"},
-        {"name": "suite", "value": "Jornada de compra de passagens"},
-        {"name": "parentSuite", "value": "Confiabilidade e desempenho"},
-        {"name": "epic", "value": "Experiencia de compra"},
-        {"name": "feature", "value": "Compra de passagem aerea"},
+        {"name": "suite", "value": "BlazeDemo"},
+        {"name": "parentSuite", "value": "Performance"},
+        {"name": "epic", "value": "BlazeDemo"},
+        {"name": "feature", "value": "Checkout"},
         {"name": "story", "value": test_name},
     ]
 
@@ -170,7 +170,7 @@ def write_test_summary_case(output_dir: Path, test_name: str, source_file: str, 
     result = {
         "uuid": str(uuid.uuid4()),
         "name": test_name,
-        "fullName": f"Jornada de compra de passagens::{test_name}",
+        "fullName": f"BlazeDemo::{test_name}",
         "historyId": test_name.replace(" ", "_").lower(),
         "status": status,
         "statusDetails": status_details,
@@ -207,7 +207,7 @@ def write_label_cases(output_dir: Path, test_name: str, grouped_rows):
 
         labels = build_common_labels(test_name)
         labels += [
-            {"name": "subSuite", "value": "Sampler Breakdown"},
+            {"name": "subSuite", "value": "Samplers"},
             {"name": "story", "value": label},
             {"name": "severity", "value": "normal"},
         ]
@@ -233,7 +233,7 @@ def write_label_cases(output_dir: Path, test_name: str, grouped_rows):
         result = {
             "uuid": str(uuid.uuid4()),
             "name": f"{test_name} :: {label}",
-            "fullName": f"Jornada de compra de passagens::{test_name}::{label}",
+            "fullName": f"BlazeDemo::{test_name}::{label}",
             "historyId": f"{test_name}-{label}".replace(" ", "_").lower(),
             "status": status,
             "statusDetails": status_details,
@@ -297,7 +297,7 @@ def write_executor_json(output_dir: Path):
             else ""
         ),
         "reportUrl": "",
-        "reportName": "Relatorio de confiabilidade da jornada de compra",
+        "reportName": "BlazeDemo performance",
     }
     (output_dir / "executor.json").write_text(json.dumps(executor, ensure_ascii=True, indent=2), encoding="utf-8")
 

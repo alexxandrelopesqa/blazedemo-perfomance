@@ -31,7 +31,7 @@ Este arquivo registra escolhas do projeto e o motivo de cada uma.
 ## 6) Execucao local sem dependencias
 
 - Escolha: `docker-compose.yml` com serviços dedicados (`perf-load`, `perf-peak`, `perf-all`)
-- Motivo: reduzir fricção para quem vai avaliar o projeto em máquina limpa.
+- Motivo: rodar sem instalar Java/JMeter/Python na máquina host.
 
 ## 7) Hardening aplicado
 
