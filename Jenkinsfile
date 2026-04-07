@@ -30,7 +30,7 @@ pipeline {
       }
     }
 
-    stage('Run Load Test') {
+    stage('Run Carga Sustentada') {
       when {
         anyOf {
           branch 'main'
@@ -50,7 +50,7 @@ pipeline {
       }
     }
 
-    stage('Run Peak Test') {
+    stage('Run Pico Abrupto') {
       when {
         anyOf {
           branch 'main'
@@ -89,11 +89,11 @@ pipeline {
                 set -eu
                 generated=0
                 if [ -f /workspace/results/load/load.jtl ]; then
-                  python3 /workspace/scripts/jtl_to_allure.py /workspace/results/load/load.jtl /workspace/allure-results "Load Test 250 RPS"
+                  python3 /workspace/scripts/jtl_to_allure.py /workspace/results/load/load.jtl /workspace/allure-results "Concluir compra carga sustentada 250 RPS"
                   generated=1
                 fi
                 if [ -f /workspace/results/peak/peak.jtl ]; then
-                  python3 /workspace/scripts/jtl_to_allure.py /workspace/results/peak/peak.jtl /workspace/allure-results "Peak Test 350 RPS"
+                  python3 /workspace/scripts/jtl_to_allure.py /workspace/results/peak/peak.jtl /workspace/allure-results "Concluir compra pico abrupto 350 RPS"
                   generated=1
                 fi
                 if [ "$generated" -eq 1 ]; then

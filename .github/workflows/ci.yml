@@ -81,8 +81,8 @@ jobs:
             mkdir -p allure-results/history
             cp -r .allure-history/history/. allure-results/history/ || true
           fi
-          python3 scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load Test 250 RPS"
-          python3 scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak Test 350 RPS"
+          python3 scripts/jtl_to_allure.py results/load/load.jtl allure-results "Concluir compra carga sustentada 250 RPS"
+          python3 scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Concluir compra pico abrupto 350 RPS"
 
       - name: Gerar relatorio Allure
         run: |
@@ -136,7 +136,7 @@ jobs:
           <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>BlazeDemo Performance Reports</title>
+            <title>Relatorios de confiabilidade da jornada de compra</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 2rem; color: #1f2937; }
               h1 { margin-bottom: 0.2rem; }
@@ -147,11 +147,11 @@ jobs:
             </style>
           </head>
           <body>
-            <h1>BlazeDemo Performance Reports</h1>
+            <h1>Relatorios de confiabilidade da jornada de compra</h1>
             <p>Relatorios gerados automaticamente pelo GitHub Actions.</p>
             <ul>
-              <li><a href="./load-dashboard/index.html">JMeter Dashboard - Load Test</a></li>
-              <li><a href="./peak-dashboard/index.html">JMeter Dashboard - Peak Test</a></li>
+              <li><a href="./load-dashboard/index.html">JMeter Dashboard - Carga sustentada</a></li>
+              <li><a href="./peak-dashboard/index.html">JMeter Dashboard - Pico abrupto</a></li>
               <li><a href="./allure-report/index.html">Allure Report</a></li>
             </ul>
           </body>

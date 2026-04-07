@@ -50,7 +50,7 @@ Asserções funcionais:
 
 ## Arquitetura do teste e perfil de carga
 
-### 1) Load test (`scripts/load_test.jmx`)
+### 1) Cenario de compra sob carga sustentada (`scripts/load_test.jmx`)
 
 Objetivo: validar estabilidade no patamar alvo.
 
@@ -59,7 +59,7 @@ Objetivo: validar estabilidade no patamar alvo.
 - ramp-up `120s`
 - duração `600s`
 
-### 2) Spike test (`scripts/peak_test.jmx`)
+### 2) Cenario de compra sob pico abrupto (`scripts/peak_test.jmx`)
 
 Objetivo: observar degradação e recuperação sob aumento brusco.
 
@@ -99,8 +99,8 @@ docker compose run --rm perf-all
 ```bash
 jmeter -n -t scripts/load_test.jmx -l results/load/load.jtl -e -o results/load/dashboard
 jmeter -n -t scripts/peak_test.jmx -l results/peak/peak.jtl -e -o results/peak/dashboard
-python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load Test 250 RPS"
-python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak Test 350 RPS"
+python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Concluir compra carga sustentada 250 RPS"
+python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Concluir compra pico abrupto 350 RPS"
 allure generate allure-results --clean -o results/allure-report
 ```
 
@@ -138,8 +138,8 @@ Comportamento de robustez:
 - `results/load/dashboard/index.html`
 - `results/peak/dashboard/index.html`
 - `results/allure-report/index.html`
-- `allure-results/load_test_250_rps-summary.json`
-- `allure-results/peak_test_350_rps-summary.json`
+- `allure-results/concluir_compra_carga_sustentada_250_rps-summary.json`
+- `allure-results/concluir_compra_pico_abrupto_350_rps-summary.json`
 
 ### O que você passa a ver no Allure
 
