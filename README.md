@@ -81,11 +81,12 @@ Resumos JSON gerados (nomes derivados do parâmetro do teste):
 ## CI/CD
 
 - **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512; `mvn package` do `jtl-allure` e conversão JTL→Allure (Java) com falha se critério não for atingido; artefatos e Pages em `main`/`master`; upload com `always()` para preservar evidências mesmo com falha.
+- **Agendamento**: execução diária às **20:00** (horário de Brasília, `America/Sao_Paulo`), via `schedule` em UTC (`0 23 * * *`). Disparos agendados usam o branch padrão do repositório; pequenos atrasos são possíveis em horários de pico do GitHub Actions.
 - **Jenkins**: `Jenkinsfile` — Docker, `catchError` nos estágios de teste, Allure só se existir JTL.
 
-## Auditoria (commits e PRs)
+## Rastreabilidade
 
-Comandos `git`, UI do GitHub, API REST e audit log de organização: ver [AUDIT.md](AUDIT.md).
+Commits e PRs no GitHub; execuções em **Actions** e artefactos do workflow. Ver [AUDIT.md](AUDIT.md).
 
 ## Decisões de projeto
 

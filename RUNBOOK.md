@@ -65,7 +65,13 @@ java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaseline
 - Revisar `connect_timeout_ms` e `response_timeout_ms` no `.jmx`.
 - Validar estabilidade da rede para `www.blazedemo.com`.
 
-## 5) Coleta para anexar em avaliação técnica
+## 5) GitHub Actions (CI e rodada diaria)
+
+- **Quando roda**: em cada `push`/`pull_request` nas branches configuradas, manualmente (`workflow_dispatch`) e **todo dia às 20:00** horário de Brasília (cron `0 23 * * *` em UTC no workflow).
+- **Onde ver**: aba *Actions* do repositório; artefatos (`blazedemo-performance-reports`) e, em `main`/`master`, deploy para GitHub Pages quando aplicável.
+- Rodadas agendadas executam no **branch padrão**; o horário no YAML é sempre **UTC** — para mudar o horário local, ajuste o cron ou use uma tabela de conversão.
+
+## 6) Coleta para anexar em avaliação técnica
 
 Salvar/compartilhar:
 
