@@ -1,11 +1,9 @@
-Diretorio de hooks Git deste repositorio: vazio de proposito.
+Hooks Git deste repositorio.
 
-Apos clonar, na raiz do repositorio:
+A pasta `.githooks` e versionada e pode ficar sem scripts executaveis.
+
+Apos clonar, na raiz:
 
   git config core.hooksPath .githooks
 
-Assim o Git usa apenas esta pasta e nao hooks globais (por exemplo de IDE) que alterem mensagens de commit.
-
-Nota (Windows): se o comando `git` no PATH for um shim (ex.: Scoop) que altera mensagens de commit, use o executavel oficial, por exemplo:
-
-  "C:\Program Files\Git\cmd\git.exe"
+Em Windows, se houver problemas com o `git` do PATH, use o executavel instalado pelo Git for Windows (por exemplo em `Program Files\Git\cmd`).

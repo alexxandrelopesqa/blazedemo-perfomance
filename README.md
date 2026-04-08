@@ -6,14 +6,13 @@ Repo: [alexxandrelopesqa/blazedemo-perfomance](https://github.com/alexxandrelope
 
 ## Critério de aceite
 
-**Referência (desafio / alvo de negócio):** `250 RPS` sustentados e `p90 < 2s`.
+- `250 RPS` sustentados
+- `p90 < 2s`
 
-**Perfis neste repositório:** o host público `www.blazedemo.com` **não sustenta** de forma estável centenas de RPS; os `.jmx` usam **~30 RPS** (carga) e **~70 RPS** (pico). O gate do `jtl-allure` no CI e no Docker (`ACCEPTANCE_RPS` / `ACCEPTANCE_P90_MS`) está alinhado a isso: **mínimo ~22 / ~50 RPS** e **p90 &lt; 8000 ms** (ver comandos abaixo).
+Checagem rápida no dashboard de carga (`Aggregate Report`):
 
-Checagem rápida no dashboard de carga (`Aggregate Report`), para o perfil atual:
-
-- Throughput próximo do alvo do cenário (`1800/min` ≈ 30/s no load; `4200/min` ≈ 70/s no peak)
-- `90% Line` abaixo do gate configurado (`ACCEPTANCE_P90_MS`, padrão `8000` ms neste projeto)
+- Throughput ≥ `250 req/s`
+- `90% Line` < `2000 ms`
 - `Error %` ≈ `0`
 
 ## Fluxo exercitado
@@ -30,8 +29,8 @@ Validações: HTTP 200 em cada passo; corpo final com `Thank you for your purcha
 
 | Arquivo | Objetivo | Throughput alvo | Threads | Ramp-up | Duração |
 |---------|----------|-----------------|---------|---------|---------|
-| `scripts/load_test.jmx` | carga estável | `1800/min` (~30 RPS) | 60 | 60s | 400s |
-| `scripts/peak_test.jmx` | pico | `4200/min` (~70 RPS) | 120 | 30s | 150s |
+| `scripts/load_test.jmx` | carga estável | `15000/min` (~250 RPS) | 350 | 120s | 600s |
+| `scripts/peak_test.jmx` | pico | `21000/min` (~350 RPS) | 500 | 30s | 240s |
 
 ## Execução
 
@@ -61,17 +60,17 @@ Java 17+, Maven 3.9+ (para compilar `jtl-allure`), JMeter 5.6.3; Allure CLI opci
 mvn -f jtl-allure/pom.xml -q package -DskipTests
 jmeter -n -t scripts/load_test.jmx -l results/load/load.jtl -e -o results/load/dashboard
 jmeter -n -t scripts/peak_test.jmx -l results/peak/peak.jtl -e -o results/peak/dashboard
-ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=22 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 30 RPS"
-ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=50 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 70 RPS"
+ACCEPTANCE_RPS=250 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS"
+ACCEPTANCE_RPS=350 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS"
 allure generate allure-results --clean -o results/allure-report
 ```
 
-O módulo `jtl-allure` aplica **RPS mínimo** e **p90** por cenário (variáveis `ACCEPTANCE_RPS`, `ACCEPTANCE_P90_MS`). Se houver falhas funcionais no JTL (`success=false`) ou SLO não atendido, o processo termina com **código 3** e o job de CI falha. Para só gerar relatório local sem falhar o comando, use `STRICT_ACCEPTANCE=0`.
+O módulo `jtl-allure` aplica o mesmo critério do README (RPS mínimo + p90) por cenário: **250 RPS** no load e **350 RPS** no peak (`ACCEPTANCE_P90_MS` padrão `2000`). Se houver falhas funcionais no JTL ou SLO não atendido, o processo termina com **código 3** e o job de CI falha. Para só gerar relatório local sem falhar o comando, use `STRICT_ACCEPTANCE=0`.
 
 Resumos JSON gerados (nomes derivados do parâmetro do teste):
 
-- `allure-results/load_30_rps-summary.json`
-- `allure-results/peak_70_rps-summary.json`
+- `allure-results/load_250_rps-summary.json`
+- `allure-results/peak_350_rps-summary.json`
 
 ## Evidências
 
@@ -89,7 +88,7 @@ Resumos JSON gerados (nomes derivados do parâmetro do teste):
 
 Commits e PRs no GitHub; execuções em **Actions** e artefatos do workflow. Ver [AUDIT.md](AUDIT.md).
 
-Opcional após clone: `git config core.hooksPath .githooks` — pasta versionada vazia; evita que hooks globais alterem commits.
+Opcional após clone: `git config core.hooksPath .githooks` (ver `.githooks/README`).
 
 ## Decisões de projeto
 
@@ -103,13 +102,15 @@ Detalhes em [DECISIONS.md](DECISIONS.md) (ferramenta, fluxo E2E, CSV, perfis, re
 
 ## Baseline registrado
 
-Os `.jtl` em `results/` podem corresponder a **perfis antigos** (carga mais alta). Após alterar os `.jmx`, volte a gerar relatórios e atualize esta secção.
+Não atende `p90 < 2s` na rodada documentada nos JTL versionados em `results/`.
 
 **Fonte dos números:** `results/load/load.jtl` e `results/peak/peak.jtl` (agregação igual ao módulo `jtl-allure`: p90 sobre `elapsed` de todas as amostras; throughput = amostras / duração da janela do teste).
 
-**Exemplo (rodada histórica com ~250 RPS alvo no plano):** load com throughput `366.6 RPS`, p90 `5078 ms`; peak com `378.68 RPS`, p90 `7533 ms` — **não** cumpriam `p90 < 2s` nem estabilidade sob aquele perfil.
+**Load (`load_test.jmx`):** throughput `366.6 RPS`, p90 `5078 ms`, falhas `2002 / 220121`, latência média (`elapsed`) `1723.68 ms`.
 
-Atualizar com: `java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaselineApp` (ou `--json`).
+**Peak (`peak_test.jmx`):** throughput `378.68 RPS`, p90 `7533 ms`, falhas `2114 / 90921`, latência média (`elapsed`) `2499.33 ms`.
+
+Após gerar novos `.jtl`, atualize esta secção com: `java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaselineApp` (ou acrescentar `--json`).
 
 ## Próximos passos
 
