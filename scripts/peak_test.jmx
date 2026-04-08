@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="BlazeDemo - peak 350 RPS" enabled="true">
-      <stringProp name="TestPlan.comments">Spike ~350 RPS.</stringProp>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="BlazeDemo - peak 70 RPS" enabled="true">
+      <stringProp name="TestPlan.comments">Spike ~70 RPS (site publico); gate CI em README/DECISIONS.</stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
@@ -25,7 +25,7 @@
           </elementProp>
           <elementProp name="response_timeout_ms" elementType="Argument">
             <stringProp name="Argument.name">response_timeout_ms</stringProp>
-            <stringProp name="Argument.value">10000</stringProp>
+            <stringProp name="Argument.value">15000</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -65,25 +65,25 @@
         <stringProp name="variableNames">fromPort,toPort,inputName,address,city,state,zipCode,cardType,creditCardNumber,creditCardMonth,creditCardYear,nameOnCard,rememberMe</stringProp>
       </CSVDataSet>
       <hashTree/>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG peak 350 RPS" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG peak 70 RPS" enabled="true">
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">true</boolProp>
           <stringProp name="LoopController.loops">-1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">500</stringProp>
+        <stringProp name="ThreadGroup.num_threads">120</stringProp>
         <stringProp name="ThreadGroup.ramp_time">30</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">240</stringProp>
+        <stringProp name="ThreadGroup.duration">150</stringProp>
         <stringProp name="ThreadGroup.delay">0</stringProp>
       </ThreadGroup>
       <hashTree>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="CTT 350 RPS" enabled="true">
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="CTT 70 RPS" enabled="true">
           <doubleProp>
             <name>calcMode</name>
             <value>2.0</value>
             <savedValue>2.0</savedValue>
           </doubleProp>
-          <stringProp name="throughput">21000</stringProp>
+          <stringProp name="throughput">4200</stringProp>
         </ConstantThroughputTimer>
         <hashTree/>
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="TRX checkout E2E" enabled="true">

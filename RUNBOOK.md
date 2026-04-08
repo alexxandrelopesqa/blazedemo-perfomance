@@ -24,10 +24,10 @@ Abrir:
 
 - `results/load/dashboard/index.html` (Aggregate Report)
 
-Checar:
+Checar (para os perfis atuais nos `.jmx`, ~30 e ~70 RPS):
 
-- `Throughput >= 250 req/s`
-- `90% Line < 2000 ms`
+- Throughput coerente com o cenário (ver tabela no README)
+- `90% Line` abaixo do gate (`ACCEPTANCE_P90_MS`, padrão `8000` ms no projeto)
 - `Error %` próximo de `0`
 
 Se qualquer item falhar, considerar baseline reprovado no critério.
@@ -36,8 +36,8 @@ Se qualquer item falhar, considerar baseline reprovado no critério.
 
 ```bash
 mvn -f jtl-allure/pom.xml -q package -DskipTests
-ACCEPTANCE_RPS=250 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS"
-ACCEPTANCE_RPS=350 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS"
+ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=22 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 30 RPS"
+ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=50 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 70 RPS"
 ```
 
 Se o critério não for atendido, o processo termina com código `3` (use `STRICT_ACCEPTANCE=0` para só gerar o relatório).

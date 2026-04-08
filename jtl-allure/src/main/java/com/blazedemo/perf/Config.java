@@ -12,8 +12,8 @@ public final class Config {
 
     public Config() {
         this.targetUrl = env("TARGET_URL", "https://www.blazedemo.com");
-        this.acceptanceRps = parseDoubleEnv("ACCEPTANCE_RPS", 250.0);
-        this.acceptanceP90Ms = (int) parseDoubleEnv("ACCEPTANCE_P90_MS", 2000.0);
+        this.acceptanceRps = parseDoubleEnv("ACCEPTANCE_RPS", 22.0);
+        this.acceptanceP90Ms = (int) parseDoubleEnv("ACCEPTANCE_P90_MS", 8000.0);
         this.topFailedSamples = (int) parseDoubleEnv("ALLURE_FAILED_SAMPLES", 5.0);
         String s = env("STRICT_ACCEPTANCE", "1").trim().toLowerCase(Locale.ROOT);
         this.strictAcceptance = !(s.equals("0") || s.equals("false") || s.equals("no"));

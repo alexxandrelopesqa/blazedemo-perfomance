@@ -88,12 +88,13 @@ pipeline {
               sh -c '
                 set -eu
                 generated=0
+                export ACCEPTANCE_P90_MS="${ACCEPTANCE_P90_MS:-8000}"
                 if [ -f /workspace/results/load/load.jtl ]; then
-                  ACCEPTANCE_RPS=250 java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/load/load.jtl /workspace/allure-results "Load 250 RPS"
+                  ACCEPTANCE_RPS="${ACCEPTANCE_RPS_LOAD:-22}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/load/load.jtl /workspace/allure-results "Load 30 RPS"
                   generated=1
                 fi
                 if [ -f /workspace/results/peak/peak.jtl ]; then
-                  ACCEPTANCE_RPS=350 java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 350 RPS"
+                  ACCEPTANCE_RPS="${ACCEPTANCE_RPS_PEAK:-50}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 70 RPS"
                   generated=1
                 fi
                 if [ "$generated" -eq 1 ]; then

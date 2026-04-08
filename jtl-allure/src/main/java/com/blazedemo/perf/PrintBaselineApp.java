@@ -37,8 +37,8 @@ public final class PrintBaselineApp {
         }
 
         List<ObjectNode> out = new ArrayList<>();
-        out.add(aggregate("Load 250 RPS", loadPath, repo));
-        out.add(aggregate("Peak 350 RPS", peakPath, repo));
+        out.add(aggregate("Load 30 RPS", loadPath, repo));
+        out.add(aggregate("Peak 70 RPS", peakPath, repo));
 
         ObjectMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
         if (jsonOut) {

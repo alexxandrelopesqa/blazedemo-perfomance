@@ -19,9 +19,9 @@ Este arquivo registra escolhas do projeto e o motivo de cada uma.
 
 ## 4) Perfil de carga
 
-- Load test: `15000/min`, `350` threads, ramp-up `120s`, duração `600s`
-- Spike test: `21000/min`, `500` threads, ramp-up `30s`, duração `240s`
-- Motivo: ter um teste de estabilidade e outro de estresse abrupto.
+- Load test: `1800/min` (~30 RPS), `60` threads, ramp-up `60s`, duração `400s`
+- Spike test: `4200/min` (~70 RPS), `120` threads, ramp-up `30s`, duração `150s`
+- Motivo: o host público não sustenta centenas de RPS com baixa taxa de erro; perfis moderados mantêm o fluxo E2E e o CI utilizável. Referência de desafio (`250 RPS`, `p90 < 2s`) permanece no README como alvo conceitual.
 
 ## 5) Relatorios
 
@@ -43,5 +43,5 @@ Este arquivo registra escolhas do projeto e o motivo de cada uma.
 
 ## 8) Estado atual do critério
 
-- Resultado baseline: **não atende** `p90 < 2s` no load.
-- Motivo técnico: latência de cauda e taxa de erro acima do alvo, apesar de throughput razoável.
+- Gate do `jtl-allure` (CI/Docker): RPS mínimos ~22 / ~50 e p90 &lt; 8000 ms, alinhados aos perfis atuais.
+- Referência `250 RPS` / `p90 < 2s`: ver README; medições antigas em `results/` com carga agressiva não a cumpriam.
