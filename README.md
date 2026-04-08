@@ -59,10 +59,12 @@ Java 17+, JMeter 5.6.3, Python 3.10+; Allure CLI opcional.
 ```bash
 jmeter -n -t scripts/load_test.jmx -l results/load/load.jtl -e -o results/load/dashboard
 jmeter -n -t scripts/peak_test.jmx -l results/peak/peak.jtl -e -o results/peak/dashboard
-python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
-python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
+ACCEPTANCE_RPS=250 python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
+ACCEPTANCE_RPS=350 python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
 allure generate allure-results --clean -o results/allure-report
 ```
+
+O script `jtl_to_allure.py` aplica o mesmo critério do README (RPS mínimo + p90) por cenário: **250 RPS** no load e **350 RPS** no peak (`ACCEPTANCE_P90_MS` padrão `2000`). Se houver falhas funcionais no JTL ou SLO não atendido, o processo termina com **código 3** e o job de CI falha. Para só gerar relatório local sem falhar o comando, use `STRICT_ACCEPTANCE=0`.
 
 Resumos JSON gerados pelo script (nomes derivados do parâmetro do teste):
 
@@ -77,7 +79,7 @@ Resumos JSON gerados pelo script (nomes derivados do parâmetro do teste):
 
 ## CI/CD
 
-- **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512, artefatos e Pages em `main`/`master`; passos de upload com `always()` para não perder relatório se o teste falhar.
+- **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512; conversão JTL→Allure com falha se critério não for atingido; artefatos e Pages em `main`/`master`; upload com `always()` para preservar evidências mesmo com falha.
 - **Jenkins**: `Jenkinsfile` — Docker, `catchError` nos estágios de teste, Allure só se existir JTL.
 
 ## Decisões de projeto

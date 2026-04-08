@@ -35,9 +35,11 @@ Se qualquer item falhar, considerar baseline reprovado no critério.
 ## 3) Comandos de apoio (CLI)
 
 ```bash
-python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
-python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
+ACCEPTANCE_RPS=250 python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
+ACCEPTANCE_RPS=350 python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
 ```
+
+Se o critério não for atendido, o script termina com código `3` (use `STRICT_ACCEPTANCE=0` para só gerar o relatório).
 
 ## 4) Problemas comuns
 

@@ -89,11 +89,11 @@ pipeline {
                 set -eu
                 generated=0
                 if [ -f /workspace/results/load/load.jtl ]; then
-                  python3 /workspace/scripts/jtl_to_allure.py /workspace/results/load/load.jtl /workspace/allure-results "Load 250 RPS"
+                  ACCEPTANCE_RPS=250 python3 /workspace/scripts/jtl_to_allure.py /workspace/results/load/load.jtl /workspace/allure-results "Load 250 RPS"
                   generated=1
                 fi
                 if [ -f /workspace/results/peak/peak.jtl ]; then
-                  python3 /workspace/scripts/jtl_to_allure.py /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 350 RPS"
+                  ACCEPTANCE_RPS=350 python3 /workspace/scripts/jtl_to_allure.py /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 350 RPS"
                   generated=1
                 fi
                 if [ "$generated" -eq 1 ]; then

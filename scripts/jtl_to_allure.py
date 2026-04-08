@@ -11,6 +11,9 @@ TARGET_URL = os.getenv("TARGET_URL", "https://www.blazedemo.com")
 ACCEPTANCE_RPS = float(os.getenv("ACCEPTANCE_RPS", "250"))
 ACCEPTANCE_P90_MS = int(float(os.getenv("ACCEPTANCE_P90_MS", "2000")))
 TOP_FAILED_SAMPLES = int(float(os.getenv("ALLURE_FAILED_SAMPLES", "5")))
+# Exit 3 when SLO/functional checks fail (set STRICT_ACCEPTANCE=0 to only generate reports, e.g. local triage)
+STRICT_ACCEPTANCE = os.getenv("STRICT_ACCEPTANCE", "1").strip().lower() not in ("0", "false", "no")
+EXIT_ACCEPTANCE_FAILED = 3
 
 
 def safe_int(value: str, default: int = 0) -> int:
@@ -264,10 +267,16 @@ def write_environment_properties(output_dir: Path):
                 key, value = line.split("=", 1)
                 existing[key.strip()] = value.strip()
 
+    new_rps = f"{ACCEPTANCE_RPS:.0f}"
+    if "acceptance.rps" in existing and existing["acceptance.rps"] != new_rps:
+        existing["acceptance.rps.load"] = existing.pop("acceptance.rps")
+        existing["acceptance.rps.peak"] = new_rps
+    else:
+        existing["acceptance.rps"] = new_rps
+
     existing.update(
         {
             "target.url": TARGET_URL,
-            "acceptance.rps": f"{ACCEPTANCE_RPS:.0f}",
             "acceptance.p90.ms": str(ACCEPTANCE_P90_MS),
             "jmeter.version": os.getenv("JMETER_VERSION", "5.6.3"),
             "python.version": sys.version.split()[0],
@@ -371,6 +380,12 @@ def main():
     write_executor_json(allure_results)
     write_categories_json(allure_results)
     write_summary_file(allure_results, test_name, metrics)
+
+    status, status_details = build_status(metrics)
+    if status == "failed" and STRICT_ACCEPTANCE:
+        msg = status_details.get("message", "Criterio de aceite nao atendido.")
+        print(msg, file=sys.stderr)
+        sys.exit(EXIT_ACCEPTANCE_FAILED)
 
 
 if __name__ == "__main__":
