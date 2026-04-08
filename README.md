@@ -94,11 +94,15 @@ Detalhes em [DECISIONS.md](DECISIONS.md) (ferramenta, fluxo E2E, CSV, perfis, re
 
 ## Baseline registrado
 
-Não atende `p90 < 2s` na rodada documentada.
+Não atende `p90 < 2s` na rodada documentada nos JTL versionados em `results/`.
 
-**Load:** throughput `292.73 RPS`, p90 `6890 ms`, falhas `6299 / 175650`, latência média `2165.61 ms`.
+**Fonte dos números:** `results/load/load.jtl` e `results/peak/peak.jtl` (agregação igual a `scripts/jtl_to_allure.py`: p90 sobre `elapsed` de todas as amostras; throughput = amostras / duração da janela do teste).
 
-**Peak:** throughput `231.17 RPS`, p90 `10376 ms`, falhas `8247 / 55511`, latência média `4100.34 ms`.
+**Load (`load_test.jmx`):** throughput `366.6 RPS`, p90 `5078 ms`, falhas `2002 / 220121`, latência média (`elapsed`) `1723.68 ms`.
+
+**Peak (`peak_test.jmx`):** throughput `378.68 RPS`, p90 `7533 ms`, falhas `2114 / 90921`, latência média (`elapsed`) `2499.33 ms`.
+
+Após gerar novos `.jtl`, atualize esta secção com: `python scripts/print_baseline_from_jtl.py` (ou `python scripts/print_baseline_from_jtl.py --json`).
 
 ## Próximos passos
 

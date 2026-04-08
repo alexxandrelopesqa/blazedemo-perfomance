@@ -41,6 +41,12 @@ ACCEPTANCE_RPS=350 python scripts/jtl_to_allure.py results/peak/peak.jtl allure-
 
 Se o critério não for atendido, o script termina com código `3` (use `STRICT_ACCEPTANCE=0` para só gerar o relatório).
 
+Para listar métricas agregadas dos JTL atuais (mesma lógica do Allure) e copiar para o README:
+
+```bash
+python scripts/print_baseline_from_jtl.py
+```
+
 ## 4) Problemas comuns
 
 ### Dashboard nao gera
