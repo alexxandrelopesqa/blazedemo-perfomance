@@ -1,0 +1,7 @@
+Diretorio de hooks Git deste repositorio: vazio de proposito.
+
+Apos clonar, na raiz do repositorio:
+
+  git config core.hooksPath .githooks
+
+Assim o Git usa apenas esta pasta e nao hooks globais (por exemplo de IDE) que alterem mensagens de commit.

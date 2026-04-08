@@ -86,7 +86,9 @@ Resumos JSON gerados (nomes derivados do parâmetro do teste):
 
 ## Rastreabilidade
 
-Commits e PRs no GitHub; execuções em **Actions** e artefactos do workflow. Ver [AUDIT.md](AUDIT.md).
+Commits e PRs no GitHub; execuções em **Actions** e artefatos do workflow. Ver [AUDIT.md](AUDIT.md).
+
+Opcional após clone: `git config core.hooksPath .githooks` — pasta versionada vazia; evita que hooks globais alterem commits.
 
 ## Decisões de projeto
 

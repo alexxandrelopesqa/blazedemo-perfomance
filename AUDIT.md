@@ -12,6 +12,6 @@ Notas para rever **commits**, **PRs** e **execuções de CI** neste repositório
 
 - **Actions:** histórico do workflow em `.github/workflows/ci.yml` (push, PR, manual e agendamento).
 - **Pull requests:** diff agregado, comentários e checks.
-- **Artefactos:** nome típico `blazedemo-performance-reports`; retenção definida no workflow.
+- **Artefatos:** nome típico `blazedemo-performance-reports`; retenção definida no workflow.
 
 Em contas pessoais não existe audit log organizacional; em organizações com esse recurso, ver *Organization settings → Audit log*.
