@@ -35,16 +35,17 @@ Se qualquer item falhar, considerar baseline reprovado no critério.
 ## 3) Comandos de apoio (CLI)
 
 ```bash
-ACCEPTANCE_RPS=250 python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
-ACCEPTANCE_RPS=350 python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
+mvn -f jtl-allure/pom.xml -q package -DskipTests
+ACCEPTANCE_RPS=250 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS"
+ACCEPTANCE_RPS=350 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS"
 ```
 
-Se o critério não for atendido, o script termina com código `3` (use `STRICT_ACCEPTANCE=0` para só gerar o relatório).
+Se o critério não for atendido, o processo termina com código `3` (use `STRICT_ACCEPTANCE=0` para só gerar o relatório).
 
 Para listar métricas agregadas dos JTL atuais (mesma lógica do Allure) e copiar para o README:
 
 ```bash
-python scripts/print_baseline_from_jtl.py
+java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaselineApp
 ```
 
 ## 4) Problemas comuns

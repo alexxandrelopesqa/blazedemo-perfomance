@@ -54,19 +54,20 @@ Saídas típicas:
 
 ### CLI local
 
-Java 17+, JMeter 5.6.3, Python 3.10+; Allure CLI opcional.
+Java 17+, Maven 3.9+ (para compilar `jtl-allure`), JMeter 5.6.3; Allure CLI opcional.
 
 ```bash
+mvn -f jtl-allure/pom.xml -q package -DskipTests
 jmeter -n -t scripts/load_test.jmx -l results/load/load.jtl -e -o results/load/dashboard
 jmeter -n -t scripts/peak_test.jmx -l results/peak/peak.jtl -e -o results/peak/dashboard
-ACCEPTANCE_RPS=250 python scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
-ACCEPTANCE_RPS=350 python scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
+ACCEPTANCE_RPS=250 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS"
+ACCEPTANCE_RPS=350 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS"
 allure generate allure-results --clean -o results/allure-report
 ```
 
-O script `jtl_to_allure.py` aplica o mesmo critério do README (RPS mínimo + p90) por cenário: **250 RPS** no load e **350 RPS** no peak (`ACCEPTANCE_P90_MS` padrão `2000`). Se houver falhas funcionais no JTL ou SLO não atendido, o processo termina com **código 3** e o job de CI falha. Para só gerar relatório local sem falhar o comando, use `STRICT_ACCEPTANCE=0`.
+O módulo `jtl-allure` aplica o mesmo critério do README (RPS mínimo + p90) por cenário: **250 RPS** no load e **350 RPS** no peak (`ACCEPTANCE_P90_MS` padrão `2000`). Se houver falhas funcionais no JTL ou SLO não atendido, o processo termina com **código 3** e o job de CI falha. Para só gerar relatório local sem falhar o comando, use `STRICT_ACCEPTANCE=0`.
 
-Resumos JSON gerados pelo script (nomes derivados do parâmetro do teste):
+Resumos JSON gerados (nomes derivados do parâmetro do teste):
 
 - `allure-results/load_250_rps-summary.json`
 - `allure-results/peak_350_rps-summary.json`
@@ -79,7 +80,7 @@ Resumos JSON gerados pelo script (nomes derivados do parâmetro do teste):
 
 ## CI/CD
 
-- **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512; conversão JTL→Allure com falha se critério não for atingido; artefatos e Pages em `main`/`master`; upload com `always()` para preservar evidências mesmo com falha.
+- **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512; `mvn package` do `jtl-allure` e conversão JTL→Allure (Java) com falha se critério não for atingido; artefatos e Pages em `main`/`master`; upload com `always()` para preservar evidências mesmo com falha.
 - **Jenkins**: `Jenkinsfile` — Docker, `catchError` nos estágios de teste, Allure só se existir JTL.
 
 ## Auditoria (commits e PRs)
@@ -100,13 +101,13 @@ Detalhes em [DECISIONS.md](DECISIONS.md) (ferramenta, fluxo E2E, CSV, perfis, re
 
 Não atende `p90 < 2s` na rodada documentada nos JTL versionados em `results/`.
 
-**Fonte dos números:** `results/load/load.jtl` e `results/peak/peak.jtl` (agregação igual a `scripts/jtl_to_allure.py`: p90 sobre `elapsed` de todas as amostras; throughput = amostras / duração da janela do teste).
+**Fonte dos números:** `results/load/load.jtl` e `results/peak/peak.jtl` (agregação igual ao módulo `jtl-allure`: p90 sobre `elapsed` de todas as amostras; throughput = amostras / duração da janela do teste).
 
 **Load (`load_test.jmx`):** throughput `366.6 RPS`, p90 `5078 ms`, falhas `2002 / 220121`, latência média (`elapsed`) `1723.68 ms`.
 
 **Peak (`peak_test.jmx`):** throughput `378.68 RPS`, p90 `7533 ms`, falhas `2114 / 90921`, latência média (`elapsed`) `2499.33 ms`.
 
-Após gerar novos `.jtl`, atualize esta secção com: `python scripts/print_baseline_from_jtl.py` (ou `python scripts/print_baseline_from_jtl.py --json`).
+Após gerar novos `.jtl`, atualize esta secção com: `java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaselineApp` (ou acrescentar `--json`).
 
 ## Próximos passos
 

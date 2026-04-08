@@ -15,8 +15,8 @@ echo "[run-all] Executando peak_test.jmx"
 jmeter -n -t /workspace/scripts/peak_test.jmx -l /workspace/results/peak/peak.jtl -j /workspace/results/peak/jmeter.log -e -o /workspace/results/peak/dashboard
 
 echo "[run-all] Convertendo JTL para Allure"
-ACCEPTANCE_RPS=250 python3 /workspace/scripts/jtl_to_allure.py /workspace/results/load/load.jtl /workspace/allure-results "Load 250 RPS"
-ACCEPTANCE_RPS=350 python3 /workspace/scripts/jtl_to_allure.py /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 350 RPS"
+ACCEPTANCE_RPS=250 java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/load/load.jtl /workspace/allure-results "Load 250 RPS"
+ACCEPTANCE_RPS=350 java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 350 RPS"
 
 echo "[run-all] Gerando relatorio Allure"
 allure generate /workspace/allure-results --clean -o /workspace/results/allure-report

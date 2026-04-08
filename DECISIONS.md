@@ -31,7 +31,7 @@ Este arquivo registra escolhas do projeto e o motivo de cada uma.
 ## 6) Execucao local sem dependencias
 
 - Escolha: `docker-compose.yml` com serviços dedicados (`perf-load`, `perf-peak`, `perf-all`)
-- Motivo: rodar sem instalar Java/JMeter/Python na máquina host.
+- Motivo: rodar sem instalar Java/JMeter na máquina host (imagem inclui JMeter, Allure CLI e o JAR `jtl-allure`).
 
 ## 7) Hardening aplicado
 

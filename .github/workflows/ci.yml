@@ -28,10 +28,8 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Preparar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Compilar ferramenta JTL para Allure (Java)
+        run: mvn -f jtl-allure/pom.xml -q package -DskipTests
 
       - name: Preparar Node
         uses: actions/setup-node@v4
@@ -80,8 +78,8 @@ jobs:
             mkdir -p allure-results/history
             cp -r .allure-history/history/. allure-results/history/ || true
           fi
-          ACCEPTANCE_RPS=250 python3 scripts/jtl_to_allure.py results/load/load.jtl allure-results "Load 250 RPS"
-          ACCEPTANCE_RPS=350 python3 scripts/jtl_to_allure.py results/peak/peak.jtl allure-results "Peak 350 RPS"
+          ACCEPTANCE_RPS=250 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS"
+          ACCEPTANCE_RPS=350 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS"
 
       - name: Gerar relatorio Allure
         run: |

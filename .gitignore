@@ -7,4 +7,6 @@ allure-results/
 *.tmp
 __pycache__/
 tools/
+jtl-allure/target/
+target/
 pages/
