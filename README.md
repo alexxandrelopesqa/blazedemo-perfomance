@@ -82,6 +82,10 @@ Resumos JSON gerados pelo script (nomes derivados do parâmetro do teste):
 - **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512; conversão JTL→Allure com falha se critério não for atingido; artefatos e Pages em `main`/`master`; upload com `always()` para preservar evidências mesmo com falha.
 - **Jenkins**: `Jenkinsfile` — Docker, `catchError` nos estágios de teste, Allure só se existir JTL.
 
+## Auditoria (commits e PRs)
+
+Comandos `git`, UI do GitHub, API REST e audit log de organização: ver [AUDIT.md](AUDIT.md).
+
 ## Decisões de projeto
 
 Detalhes em [DECISIONS.md](DECISIONS.md) (ferramenta, fluxo E2E, CSV, perfis, relatórios, Docker, endurecimento).
