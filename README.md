@@ -4,16 +4,18 @@ Teste de carga no [BlazeDemo](https://www.blazedemo.com): fluxo HTTP de compra p
 
 Repo: [alexxandrelopesqa/blazedemo-perfomance](https://github.com/alexxandrelopesqa/blazedemo-perfomance.git)
 
-## Critério de aceite
+## Critério de aceite (desafio)
 
-- **Referência do desafio:** `250 RPS` sustentados e `p90 < 2s` (alvo conceitual; os JTL versionados em `results/` não atingiram isso com a carga usada na medição).
-- **Gate do `jtl-allure` com os `.jmx` atuais (~30 / ~70 RPS):** RPS ≥ `22` (load) e ≥ `50` (peak); p90 < `8000` ms; falhas `success=false` só reprovam se `error_pct` &gt; `ACCEPTANCE_MAX_ERROR_PCT` (no CI `0.01` = 0,01% para ruído do host público). Overrides: `ACCEPTANCE_RPS`, `ACCEPTANCE_P90_MS`, `STRICT_ACCEPTANCE=0` para só gerar relatório. Código `3` em falha.
+- **250 requisições por segundo** (média de amostras no JTL no intervalo do teste; o `ConstantThroughputTimer` visa **15000 amostras/min** no grupo de threads, equivalente a ~250 req/s agregadas).
+- **p90 do tempo de resposta &lt; 2 s** (`ACCEPTANCE_P90_MS=2000` no `jtl-allure`).
 
-Checagem no dashboard de carga (`Aggregate Report`) para o plano em execução:
+**Gate do `jtl-allure`:** RPS ≥ `250` e p90 &lt; `2000` ms em cada cenário; falhas `success=false` acima de `ACCEPTANCE_MAX_ERROR_PCT` reprovam (no CI **1%** para absorver instabilidade do host público). Variáveis: `ACCEPTANCE_RPS`, `ACCEPTANCE_P90_MS`, `ACCEPTANCE_MAX_ERROR_PCT`, `STRICT_ACCEPTANCE=0` (só gera relatório sem falhar o processo). Código de saída **3** se o gate falhar com aceite estrito.
 
-- Throughput coerente com o timer (~30 ou ~70 req/s nos perfis atuais)
-- `90% Line` abaixo do gate (`ACCEPTANCE_P90_MS`)
-- `Error %` ≈ `0`
+Checagem no dashboard JMeter (`Aggregate Report`):
+
+- Throughput coerente com o timer (~250 req/s no load, ~350 req/s no pico)
+- `90% Line` &lt; `2000` ms quando o SLO for atingido
+- `Error %` próximo de zero
 
 ## Fluxo exercitado
 
@@ -27,10 +29,12 @@ Validações: HTTP 200 em cada passo; corpo final com `Thank you for your purcha
 
 ## Cenários JMeter
 
-| Arquivo | Objetivo | Throughput alvo | Threads | Ramp-up | Duração |
-|---------|----------|-----------------|---------|---------|---------|
-| `scripts/load_test.jmx` | carga estável | `1800/min` (~30 RPS) | 60 | 60s | 400s |
-| `scripts/peak_test.jmx` | pico | `4200/min` (~70 RPS) | 120 | 30s | 150s |
+| Arquivo | Objetivo | Throughput alvo (timer) | Threads | Ramp-up | Duração |
+|---------|----------|---------------------------|---------|---------|---------|
+| `scripts/load_test.jmx` | carga estável | `15000/min` (~250 RPS) | 400 | 120s | 300s |
+| `scripts/peak_test.jmx` | pico | `21000/min` (~350 RPS) | 500 | 45s | 180s |
+
+O teste de **pico** mantém vazão **acima** do mínimo de 250 RPS exigido pelo desafio.
 
 ## Execução
 
@@ -60,27 +64,27 @@ Java 17+, Maven 3.9+ (para compilar `jtl-allure`), JMeter 5.6.3; Allure CLI opci
 mvn -f jtl-allure/pom.xml -q package -DskipTests
 jmeter -n -t scripts/load_test.jmx -l results/load/load.jtl -e -o results/load/dashboard
 jmeter -n -t scripts/peak_test.jmx -l results/peak/peak.jtl -e -o results/peak/dashboard
-ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=22 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 30 RPS"
-ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=50 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 70 RPS"
+ACCEPTANCE_P90_MS=2000 ACCEPTANCE_RPS=250 ACCEPTANCE_MAX_ERROR_PCT=1.0 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS"
+ACCEPTANCE_P90_MS=2000 ACCEPTANCE_RPS=250 ACCEPTANCE_MAX_ERROR_PCT=1.0 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS"
 allure generate allure-results --clean -o results/allure-report
 ```
 
 Resumos JSON (nome derivado do rótulo do teste no comando):
 
-- `allure-results/load_30_rps-summary.json`
-- `allure-results/peak_70_rps-summary.json`
+- `allure-results/load_250_rps-summary.json`
+- `allure-results/peak_350_rps-summary.json`
 
 ## Evidências
 
 - dashboards JMeter acima
 - `results/*/jmeter.log`
-- Allure: ambiente, executor, categorias de falha, breakdown por sampler
+- Allure: ambiente, executor, categorias de falha, detalhe por sampler
 
 ## CI/CD
 
-- **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512; `mvn package` do `jtl-allure` e conversão JTL→Allure (Java) com falha se critério não for atingido; artefatos e Pages em `main`/`master`; upload com `always()` para preservar evidências mesmo com falha.
-- **Agendamento**: execução diária às **08:00**, **12:00** e **18:00** (horário de Brasília, `America/Sao_Paulo`), via `schedule` em UTC (`0 11 * * *`, `0 15 * * *`, `0 21 * * *`). Disparos agendados usam o branch padrão do repositório; pequenos atrasos são possíveis em horários de pico do GitHub Actions.
-- **Jenkins**: `Jenkinsfile` — Docker, `catchError` nos estágios de teste, Allure só se existir JTL.
+- **GitHub Actions**: `.github/workflows/ci.yml` — JMeter com checksum SHA-512; `mvn package` do `jtl-allure`; conversão JTL→Allure com gate **250 RPS / p90 2 s**; os dois JARs correm mesmo se um falhar; **Gerar relatório Allure** com `if: always()` para publicar relatório mesmo quando o gate reprova; artefatos com `always()`; Pages em `main`/`master`.
+- **Agendamento**: **08:00**, **12:00** e **18:00** America/São Paulo (crons UTC `0 11 * * *`, `0 15 * * *`, `0 21 * * *`).
+- **Jenkins**: `Jenkinsfile` — Docker, `catchError` nos testes, mesmos gates que o Docker.
 
 ## Rastreabilidade
 
@@ -90,26 +94,24 @@ Opcional após clone: `git config core.hooksPath .githooks` (ver `.githooks/READ
 
 ## Decisões de projeto
 
-Detalhes em [DECISIONS.md](DECISIONS.md) (ferramenta, fluxo E2E, CSV, perfis, relatórios, Docker, endurecimento).
+Detalhes em [DECISIONS.md](DECISIONS.md).
 
 ## Problemas frequentes
 
 - **Dashboard não gera**: pasta `-e -o` deve estar vazia ou ser nova.
-- **RPS baixo**: CPU/RAM do gerador; reduzir threads ou aumentar ramp-up.
+- **RPS abaixo do gate**: o host público pode não sustentar 250+ RPS; ver `jmeter.log`, erros HTTP e ajustar threads (com cuidado) ou aceitar falha do gate documentada.
 - **Timeouts**: `connect_timeout_ms` / `response_timeout_ms` nos `.jmx`; rede até `www.blazedemo.com`.
 
-## Baseline registrado
+## Relatório de execução (baseline)
 
-Não atende `p90 < 2s` na rodada documentada nos JTL versionados em `results/`.
+Os números variam a cada execução. Para extrair o mesmo agregado do `jtl-allure` a partir de JTL gerados localmente ou baixados dos artefatos do CI:
 
-**Fonte dos números:** `results/load/load.jtl` e `results/peak/peak.jtl` (agregação igual ao módulo `jtl-allure`: p90 sobre `elapsed` de todas as amostras; throughput = amostras / duração da janela do teste).
+```bash
+java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaselineApp
+```
 
-**Load (`load_test.jmx`):** throughput `366.6 RPS`, p90 `5078 ms`, falhas `2002 / 220121`, latência média (`elapsed`) `1723.68 ms`.
-
-**Peak (`peak_test.jmx`):** throughput `378.68 RPS`, p90 `7533 ms`, falhas `2114 / 90921`, latência média (`elapsed`) `2499.33 ms`.
-
-Após gerar novos `.jtl`, atualize esta secção com: `java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaselineApp` (ou acrescentar `--json`).
+Use `--json` se precisar só de saída máquina-legível. Compare **RPS**, **p90** e **error %** com o critério acima; o host compartilhado pode falhar o SLO em horários de maior carga.
 
 ## Próximos passos
 
-Ajustar threads, ramp-up, pacing e timeouts em iterações; ambiente de execução fixo; p90 por transação para achar gargalo.
+Afinar threads e ramp-up por ambiente; opcionalmente medir p90 por transação para isolar gargalos.

@@ -88,21 +88,26 @@ pipeline {
               sh -c '
                 set -eu
                 generated=0
-                export ACCEPTANCE_P90_MS="${ACCEPTANCE_P90_MS:-8000}"
+                export ACCEPTANCE_P90_MS="${ACCEPTANCE_P90_MS:-2000}"
+                export ACCEPTANCE_MAX_ERROR_PCT="${ACCEPTANCE_MAX_ERROR_PCT:-1.0}"
+                FAIL=0
+                set +e
                 if [ -f /workspace/results/load/load.jtl ]; then
-                  ACCEPTANCE_RPS="${ACCEPTANCE_RPS_LOAD:-22}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/load/load.jtl /workspace/allure-results "Load 30 RPS"
+                  ACCEPTANCE_RPS="${ACCEPTANCE_RPS_LOAD:-250}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/load/load.jtl /workspace/allure-results "Load 250 RPS" || FAIL=1
                   generated=1
                 fi
                 if [ -f /workspace/results/peak/peak.jtl ]; then
-                  ACCEPTANCE_RPS="${ACCEPTANCE_RPS_PEAK:-50}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 70 RPS"
+                  ACCEPTANCE_RPS="${ACCEPTANCE_RPS_PEAK:-250}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 350 RPS" || FAIL=1
                   generated=1
                 fi
+                set -e
                 if [ "$generated" -eq 1 ]; then
                   allure generate /workspace/allure-results --clean -o /workspace/results/allure-report
                 else
                   mkdir -p /workspace/results/allure-report
                   printf "%s\n" "Nenhum JTL gerado para consolidar Allure nesta execucao." > /workspace/results/allure-report/index.html
                 fi
+                exit "$FAIL"
               '
           '''
         }

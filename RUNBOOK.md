@@ -24,11 +24,11 @@ Abrir:
 
 - `results/load/dashboard/index.html` (Aggregate Report)
 
-Checar (para os perfis atuais nos `.jmx`, ~30 e ~70 RPS):
+Checar (perfis nos `.jmx`: ~250 RPS load, ~350 RPS peak):
 
 - Throughput coerente com o cenário (ver tabela no README)
-- `90% Line` abaixo do gate (`ACCEPTANCE_P90_MS`, padrão `8000` ms no projeto)
-- Taxa de erro no JTL (`success=false`) dentro do limiar (`ACCEPTANCE_MAX_ERROR_PCT`, no CI `0.01`)
+- `90% Line` abaixo do gate (`ACCEPTANCE_P90_MS`, padrão `2000` ms = critério do desafio)
+- Taxa de erro no JTL (`success=false`) dentro do limiar (`ACCEPTANCE_MAX_ERROR_PCT`, padrão `1.0` no Docker/CI)
 - `Error %` próximo de `0`
 
 Se qualquer item falhar, considerar baseline reprovado no critério.
@@ -37,8 +37,8 @@ Se qualquer item falhar, considerar baseline reprovado no critério.
 
 ```bash
 mvn -f jtl-allure/pom.xml -q package -DskipTests
-ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=22 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 30 RPS"
-ACCEPTANCE_P90_MS=8000 ACCEPTANCE_RPS=50 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 70 RPS"
+ACCEPTANCE_P90_MS=2000 ACCEPTANCE_RPS=250 ACCEPTANCE_MAX_ERROR_PCT=1.0 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS"
+ACCEPTANCE_P90_MS=2000 ACCEPTANCE_RPS=250 ACCEPTANCE_MAX_ERROR_PCT=1.0 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS"
 ```
 
 Se o critério não for atendido, o processo termina com código `3` (use `STRICT_ACCEPTANCE=0` para só gerar o relatório).

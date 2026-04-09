@@ -19,7 +19,7 @@ concurrency:
 jobs:
   performance-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     permissions:
       contents: read
 
@@ -62,12 +62,12 @@ jobs:
       - name: Instalar Allure CLI
         run: npm install --global --ignore-scripts allure-commandline@2.34.1
 
-      - name: Rodar teste de carga (alvo ~30 RPS)
+      - name: Rodar teste de carga (alvo ~250 RPS)
         run: |
           mkdir -p results/load/dashboard
           "${HOME}/jmeter/bin/jmeter" -n -t scripts/load_test.jmx -l results/load/load.jtl -j results/load/jmeter.log -e -o results/load/dashboard
 
-      - name: Rodar teste de pico (alvo ~70 RPS)
+      - name: Rodar teste de pico (alvo ~350 RPS)
         run: |
           mkdir -p results/peak/dashboard
           "${HOME}/jmeter/bin/jmeter" -n -t scripts/peak_test.jmx -l results/peak/peak.jtl -j results/peak/jmeter.log -e -o results/peak/dashboard
@@ -75,8 +75,8 @@ jobs:
       - name: Converter JTL para Allure
         env:
           TARGET_URL: https://www.blazedemo.com
-          ACCEPTANCE_P90_MS: "8000"
-          ACCEPTANCE_MAX_ERROR_PCT: "0.01"
+          ACCEPTANCE_P90_MS: "2000"
+          ACCEPTANCE_MAX_ERROR_PCT: "1.0"
           JMETER_VERSION: "5.6.3"
         run: |
           mkdir -p allure-results .allure-history
@@ -84,10 +84,14 @@ jobs:
             mkdir -p allure-results/history
             cp -r .allure-history/history/. allure-results/history/ || true
           fi
-          ACCEPTANCE_RPS=22 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 30 RPS"
-          ACCEPTANCE_RPS=50 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 70 RPS"
+          set +e
+          FAIL=0
+          ACCEPTANCE_RPS=250 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/load/load.jtl allure-results "Load 250 RPS" || FAIL=1
+          ACCEPTANCE_RPS=250 java -jar jtl-allure/target/jtl-allure-1.0.0.jar results/peak/peak.jtl allure-results "Peak 350 RPS" || FAIL=1
+          exit $FAIL
 
       - name: Gerar relatorio Allure
+        if: always()
         run: |
           mkdir -p results/allure-report
           allure generate allure-results --clean -o results/allure-report

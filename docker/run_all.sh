@@ -2,7 +2,8 @@
 set -eu
 
 export TARGET_URL="${TARGET_URL:-https://www.blazedemo.com}"
-export ACCEPTANCE_P90_MS="${ACCEPTANCE_P90_MS:-8000}"
+export ACCEPTANCE_P90_MS="${ACCEPTANCE_P90_MS:-2000}"
+export ACCEPTANCE_MAX_ERROR_PCT="${ACCEPTANCE_MAX_ERROR_PCT:-1.0}"
 export JMETER_VERSION="${JMETER_VERSION:-5.6.3}"
 
 mkdir -p /workspace/results/load /workspace/results/peak /workspace/results/allure-report /workspace/allure-results
@@ -14,10 +15,14 @@ echo "[run-all] Executando peak_test.jmx"
 jmeter -n -t /workspace/scripts/peak_test.jmx -l /workspace/results/peak/peak.jtl -j /workspace/results/peak/jmeter.log -e -o /workspace/results/peak/dashboard
 
 echo "[run-all] Convertendo JTL para Allure"
-ACCEPTANCE_RPS="${ACCEPTANCE_RPS_LOAD:-22}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/load/load.jtl /workspace/allure-results "Load 30 RPS"
-ACCEPTANCE_RPS="${ACCEPTANCE_RPS_PEAK:-50}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 70 RPS"
+set +e
+FAIL=0
+ACCEPTANCE_RPS="${ACCEPTANCE_RPS_LOAD:-250}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/load/load.jtl /workspace/allure-results "Load 250 RPS" || FAIL=1
+ACCEPTANCE_RPS="${ACCEPTANCE_RPS_PEAK:-250}" java -jar /opt/jtl-allure/jtl-allure.jar /workspace/results/peak/peak.jtl /workspace/allure-results "Peak 350 RPS" || FAIL=1
+set -e
 
 echo "[run-all] Gerando relatorio Allure"
 allure generate /workspace/allure-results --clean -o /workspace/results/allure-report
 
 echo "[run-all] Execucao finalizada com sucesso"
+exit "${FAIL:-0}"
