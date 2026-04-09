@@ -150,7 +150,7 @@ jobs:
           </head>
           <body>
             <h1>BlazeDemo - relatorios de performance</h1>
-            <p>Saida do workflow GitHub Actions.</p>
+            <p>Saída do workflow GitHub Actions.</p>
             <ul>
               <li><a href="./load-dashboard/index.html">JMeter - load</a></li>
               <li><a href="./peak-dashboard/index.html">JMeter - peak</a></li>

@@ -1,6 +1,6 @@
 # Rastreabilidade (BlazeDemo performance)
 
-Notas para rever **commits**, **PRs** e **execuções de CI** neste repositório.
+Comandos e atalhos para rastrear **commits**, **PRs** e **execuções de CI**.
 
 ## Git (clone local)
 
@@ -14,4 +14,4 @@ Notas para rever **commits**, **PRs** e **execuções de CI** neste repositório
 - **Pull requests:** diff agregado, comentários e checks.
 - **Artefatos:** nome típico `blazedemo-performance-reports`; retenção definida no workflow.
 
-Em contas pessoais não existe audit log organizacional; em organizações com esse recurso, ver *Organization settings → Audit log*.
+Contas pessoais: sem audit log de organização. Organizações: *Organization settings → Audit log*.
