@@ -67,7 +67,7 @@ java -cp jtl-allure/target/jtl-allure-1.0.0.jar com.blazedemo.perf.PrintBaseline
 
 ## 5) GitHub Actions (CI e rodada diaria)
 
-- **Quando roda**: em cada `push`/`pull_request` nas branches configuradas, manualmente (`workflow_dispatch`) e **todo dia às 20:00** horário de Brasília (cron `0 23 * * *` em UTC no workflow).
+- **Quando roda**: em cada `push`/`pull_request` nas branches configuradas, manualmente (`workflow_dispatch`) e **todo dia às 08:00, 12:00 e 18:00** horário de Brasília (crons `0 11 * * *`, `0 15 * * *`, `0 21 * * *` em UTC no workflow).
 - **Onde ver**: aba *Actions* do repositório; artefatos (`blazedemo-performance-reports`) e, em `main`/`master`, deploy para GitHub Pages quando aplicável.
 - Rodadas agendadas executam no **branch padrão**; o horário no YAML é sempre **UTC** — para mudar o horário local, ajuste o cron ou use uma tabela de conversão.
 
