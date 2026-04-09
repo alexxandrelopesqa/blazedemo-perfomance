@@ -47,10 +47,26 @@ public final class JtlToAllure {
 
     private static StatusResult buildStatus(MetricsResult m, Config config) {
         if (m.failed() > 0) {
-            return new StatusResult(
-                    "failed",
-                    "Foram detectadas falhas funcionais: " + m.failed() + " amostras com success=false."
-            );
+            if (m.errorPct() <= config.acceptanceMaxErrorPct) {
+                System.err.printf(
+                        Locale.ROOT,
+                        "Aviso: %d amostras com success=false (%.4f%%), tolerado ate %.4f%% (ACCEPTANCE_MAX_ERROR_PCT).%n",
+                        m.failed(),
+                        m.errorPct(),
+                        config.acceptanceMaxErrorPct
+                );
+            } else {
+                return new StatusResult(
+                        "failed",
+                        String.format(
+                                Locale.ROOT,
+                                "Foram detectadas falhas funcionais: %d amostras com success=false (error_pct=%.4f%%, max permitido %.4f%%).",
+                                m.failed(),
+                                m.errorPct(),
+                                config.acceptanceMaxErrorPct
+                        )
+                );
+            }
         }
         if (m.p90Ms() >= config.acceptanceP90Ms || m.rps() < config.acceptanceRps) {
             return new StatusResult(
@@ -395,6 +411,7 @@ public final class JtlToAllure {
         summary.put("rps", round2(metrics.rps()));
         summary.put("acceptance_rps", config.acceptanceRps);
         summary.put("acceptance_p90_ms", config.acceptanceP90Ms);
+        summary.put("acceptance_max_error_pct", round4(config.acceptanceMaxErrorPct));
 
         String filename = testName.replace(" ", "_").toLowerCase(Locale.ROOT) + "-summary.json";
         var compact = JsonHelper.mapper().copy().disable(SerializationFeature.INDENT_OUTPUT);

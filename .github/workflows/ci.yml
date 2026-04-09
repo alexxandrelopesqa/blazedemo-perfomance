@@ -76,6 +76,7 @@ jobs:
         env:
           TARGET_URL: https://www.blazedemo.com
           ACCEPTANCE_P90_MS: "8000"
+          ACCEPTANCE_MAX_ERROR_PCT: "0.01"
           JMETER_VERSION: "5.6.3"
         run: |
           mkdir -p allure-results .allure-history

@@ -7,6 +7,7 @@ public final class Config {
     public final String targetUrl;
     public final double acceptanceRps;
     public final int acceptanceP90Ms;
+    public final double acceptanceMaxErrorPct;
     public final int topFailedSamples;
     public final boolean strictAcceptance;
 
@@ -14,6 +15,7 @@ public final class Config {
         this.targetUrl = env("TARGET_URL", "https://www.blazedemo.com");
         this.acceptanceRps = parseDoubleEnv("ACCEPTANCE_RPS", 22.0);
         this.acceptanceP90Ms = (int) parseDoubleEnv("ACCEPTANCE_P90_MS", 8000.0);
+        this.acceptanceMaxErrorPct = parseDoubleEnv("ACCEPTANCE_MAX_ERROR_PCT", 0.0);
         this.topFailedSamples = (int) parseDoubleEnv("ALLURE_FAILED_SAMPLES", 5.0);
         String s = env("STRICT_ACCEPTANCE", "1").trim().toLowerCase(Locale.ROOT);
         this.strictAcceptance = !(s.equals("0") || s.equals("false") || s.equals("no"));

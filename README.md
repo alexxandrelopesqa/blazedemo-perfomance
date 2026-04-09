@@ -7,7 +7,7 @@ Repo: [alexxandrelopesqa/blazedemo-perfomance](https://github.com/alexxandrelope
 ## Critério de aceite
 
 - **Referência do desafio:** `250 RPS` sustentados e `p90 < 2s` (alvo conceitual; os JTL versionados em `results/` não atingiram isso com a carga usada na medição).
-- **Gate do `jtl-allure` com os `.jmx` atuais (~30 / ~70 RPS):** sem falhas funcionais no JTL; RPS ≥ `22` (load) e ≥ `50` (peak); p90 < `8000` ms — padrões em `Config` e overrides por `ACCEPTANCE_RPS` / `ACCEPTANCE_P90_MS`. Falha com código `3`; `STRICT_ACCEPTANCE=0` só gera relatório.
+- **Gate do `jtl-allure` com os `.jmx` atuais (~30 / ~70 RPS):** RPS ≥ `22` (load) e ≥ `50` (peak); p90 < `8000` ms; falhas `success=false` só reprovam se `error_pct` &gt; `ACCEPTANCE_MAX_ERROR_PCT` (no CI `0.01` = 0,01% para ruído do host público). Overrides: `ACCEPTANCE_RPS`, `ACCEPTANCE_P90_MS`, `STRICT_ACCEPTANCE=0` para só gerar relatório. Código `3` em falha.
 
 Checagem no dashboard de carga (`Aggregate Report`) para o plano em execução:
 

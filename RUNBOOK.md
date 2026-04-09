@@ -28,6 +28,7 @@ Checar (para os perfis atuais nos `.jmx`, ~30 e ~70 RPS):
 
 - Throughput coerente com o cenário (ver tabela no README)
 - `90% Line` abaixo do gate (`ACCEPTANCE_P90_MS`, padrão `8000` ms no projeto)
+- Taxa de erro no JTL (`success=false`) dentro do limiar (`ACCEPTANCE_MAX_ERROR_PCT`, no CI `0.01`)
 - `Error %` próximo de `0`
 
 Se qualquer item falhar, considerar baseline reprovado no critério.
